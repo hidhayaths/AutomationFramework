@@ -1,0 +1,6 @@
+/target/
+Results/*
+*.class
+*.project
+*.classpath
+test-output/*
