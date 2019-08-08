@@ -3,7 +3,6 @@ package com.framework;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,6 +14,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
@@ -31,8 +31,9 @@ public class Base {
 	protected static reportEvents log;
 	
 	private static ExtentReports extent;
-	private static ExtentTest parentTest;
-	private static ExtentTest test;
+	private static ExtentTest parentTest,IterationTest,test;
+	
+	private static int iteration=1;
 	
 	@BeforeSuite
 	public void setup() {
@@ -54,20 +55,25 @@ public class Base {
     }
 	
 	@DataProvider(name="testParams")
-	public Iterator<Object> getTestData(ITestContext context) {
-		
+	public Object[][] getTestData(ITestContext context) {
 		return DataUtils.getParams(context.getCurrentXmlTest().getParameter("scenario"),getClass().getName());
+	}
+	
+	@BeforeMethod
+	public void setupIteration() {
+		IterationTest = parentTest.createNode("Iteration:"+iteration);
+		iteration++;
 	}
 	
 	@AfterMethod
 	public void captureResut(ITestResult result) {
-		if(result.getStatus()==ITestResult.FAILURE) parentTest.fail(result.getThrowable());
-    	if(result.getStatus()==ITestResult.SKIP) parentTest.skip(result.getThrowable());
+		if(result.getStatus()==ITestResult.FAILURE) IterationTest.fail(result.getThrowable());
+    	if(result.getStatus()==ITestResult.SKIP) IterationTest.skip(result.getThrowable());
 	}
 
     @AfterClass
     public void tearDown() {
-    	if(extent.getStats().getChildCount()<1) parentTest.warning("Test did not run");
+    	if(extent.getStats().getChildCount()<1) IterationTest.warning("Test did not run");
     	extent.flush();
     	driver.quit();
     }
@@ -82,7 +88,7 @@ public class Base {
     	
     	 //custom report event method
         public void verifyTrue(boolean condition,String stepName,String passMsg,String failMsg) {
-        	test = parentTest.createNode(stepName);
+        	test = IterationTest.createNode(stepName);
     			try {
     				if(condition)
     					test.pass(passMsg,MediaEntityBuilder.createScreenCaptureFromBase64String(Utils.takeScreenshot(driver)).build());
@@ -138,7 +144,7 @@ public class Base {
         }
         
         public void addReportMessage(String stepName,String description,Status status) {
-        	test = parentTest.createNode(stepName);
+        	test = IterationTest.createNode(stepName);
         	test.log(status, description);
         }
     }

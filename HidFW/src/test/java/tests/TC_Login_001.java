@@ -13,7 +13,7 @@ import pageObjects.LoginPage;
 public class TC_Login_001 extends Base {
 		
 	@Test(dataProvider="testParams")
-	public void loginTest(Param param) {
+	public void loginTest(Param param,int iteration) {
 		System.out.println(param);
 		LoginPage login= new LoginPage(driver);
 		HomePage home = new HomePage(driver);

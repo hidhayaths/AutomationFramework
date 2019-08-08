@@ -18,10 +18,10 @@ public class DataUtils {
 	private static FormulaEvaluator evaluator;
 	private static Hashtable<String, List<Object>> datatable = new Hashtable<>();
 
-	public static Iterator<Object> getParams(String scenario, String testname) {
+	public static Object[][] getParams(String scenario, String testname) {
 		String key = String.format("%s**%s", scenario, testname);
 		if (datatable.containsKey(key))
-			return datatable.get(key).iterator();
+			return getParamFromList(datatable.get(key));
 		
 		List<Object> paramArr = new ArrayList<Object>();
 		
@@ -52,7 +52,7 @@ public class DataUtils {
 			e.printStackTrace();
 		}
 		datatable.put(key, paramArr);
-		return datatable.get(key).iterator();
+		return getParamFromList(datatable.get(key));
 	}
 
 	private static String getCellValue(Cell cell) {
@@ -83,6 +83,17 @@ public class DataUtils {
 		}
 		return val;
 
+	}
+	
+	private static  Object[][] getParamFromList(List<Object> list){
+		Object[][] param =new Object[list.size()][2];
+		
+		for(int i=0;i<list.size();i++) {
+			param[i][0]=list.get(i);
+			param[i][1]=i+1;
+		}
+		
+		return param;
 	}
 
 }
